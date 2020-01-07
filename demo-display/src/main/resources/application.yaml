@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: display-service
+
+server:
+  port: 8081
+
+feign:
+  hystrix:
+    enabled: true
+
+logging:
+  level:
+    io.github.bum752.display.service.product.ProductRemoteService: DEBUG

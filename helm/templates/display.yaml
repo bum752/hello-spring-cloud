@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: display-service-account
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: display-service-role
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+    verbs:
+      - get
+      - watch
+      - list
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: display-service-account-role
+subjects:
+  - kind: ServiceAccount
+    name: display-service-account
+#    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: display-service-role
+#  kind: ClusterRole
+#  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: display-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: display-app
+  template:
+    metadata:
+      labels:
+        app: display-app
+    spec:
+      containers:
+        - name: display-app
+          image: demo-display
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8081
+      serviceAccountName: display-service-account
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: display-app
+  name: display-service
+spec:
+  selector:
+    app: display-app
+  ports:
+    - port: 8081
+      targetPort: 8081
+
+---
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: display-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            backend:
+              serviceName: display-service
+              servicePort: 8081

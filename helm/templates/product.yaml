@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: product-app
+  template:
+    metadata:
+      labels:
+        app: product-app
+    spec:
+      containers:
+        - name: product-app
+          image: demo-product
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8082
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: product-app
+  name: product-service
+spec:
+  selector:
+    app: product-app
+  ports:
+    - port: 8082
+      targetPort: 8082
