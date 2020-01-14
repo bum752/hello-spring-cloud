@@ -12,3 +12,10 @@ feign:
 logging:
   level:
     io.github.bum752.display.service.product.ProductRemoteService: DEBUG
+
+vault:
+  secret:
+    path: ${VAULT_PATH}
+
+test:
+  key: ${test-key}
